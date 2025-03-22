@@ -13,10 +13,31 @@ resource "aws_iam_policy" "lambda_dynamodb_write_policy" {
           "dynamodb:UpdateItem",
           "dynamodb:BatchWriteItem"
         ]
-        Resource = aws_dynamodb_table.main_table.arn
+        Resource = aws_dynamodb_table.songs_table.arn
       }
     ]
   })
+}
+
+# Scraper IAM Role
+resource "aws_iam_role" "scraper_lambda_role" {
+  name = "scraper_lambda_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "scraper_dynamo" {
+  role       = aws_iam_role.scraper_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
 # IAM Role for Lambda Execution
@@ -86,7 +107,7 @@ resource "aws_iam_policy" "web_db_iam_policy" {
           "dynamodb:Scan",
           "dynamodb:PutItem"
         ]
-        Resource = aws_dynamodb_table.main_table.arn
+        Resource = aws_dynamodb_table.songs_table.arn
       }
     ]
   })
@@ -144,18 +165,27 @@ resource "aws_security_group" "ec2_sg" {
   }
 }
 
-# DynamoDB Table
-resource "aws_dynamodb_table" "main_table" {
-  name           = "main_table"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "id"
+#API Gateway?
 
-  attribute {
-    name = "id"
-    type = "S"
+
+/*
+resource "aws_security_group" "allow_https" {
+  name = "allow https"
+  
+  ingress =  {
+  from_port =  80
+  to_port = 80
+  protocool = tcp
+  cidr_block = ["0.0.0.0/0"] 
+  } 
+ 
+  egress = {
+    from_port = 22
+    to_port = 22
+    protocool = -1
+    cidr_block = ["0.0.0.0/0"]
   }
 }
+*/
 
-
-#API Gateway?
 
