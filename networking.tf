@@ -118,24 +118,5 @@ output "private_subnet_ids" {
   value = [for subnet in aws_subnet.private : subnet.id]
 }
 
-/*
-resource "aws_security_group" "allow_https" {
-  name = "allow https"
-  
-  ingress =  {
-  from_port =  80
-  to_port = 80
-  protocool = tcp
-  cidr_block = ["0.0.0.0/0"] 
-  } 
- 
-  egress = {
-    from_port = 22
-    to_port = 22
-    protocool = -1
-    cidr_block = ["0.0.0.0/0"]
-  }
-}
-*/
 
 
